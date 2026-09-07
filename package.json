@@ -24,6 +24,7 @@
 		"vite": "^8.0.16"
 	},
 	"dependencies": {
+		"@sveltejs/adapter-netlify": "^6.0.4",
 		"gh": "^2.8.9"
 	}
 }
