@@ -1,7 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import Birds from '$lib/components/Birds.svelte';
+	import BlossomBranch from '$lib/components/BlossomBranch.svelte';
+	import DeerAntler from '$lib/components/DeerAntler.svelte';
+	import DeerSeal from '$lib/components/DeerSeal.svelte';
 	import HanziCell from '$lib/components/HanziCell.svelte';
 	import HanziDetail from '$lib/components/HanziDetail.svelte';
+	import InkCharacter from '$lib/components/InkCharacter.svelte';
 	import Segmented from '$lib/components/Segmented.svelte';
 	import ToneLegend from '$lib/components/ToneLegend.svelte';
 	import {
@@ -166,13 +171,21 @@
 </script>
 
 <svelte:head>
-	<title>Hanzi Index — Remembering the Hanzi 1 &amp; 2</title>
-	<meta name="description" content="Every character from James Heisig's Remembering the Hanzi and Remembering Simplified Hanzi — browse by book order or optimised sequence, in simplified or traditional script." />
+	<title>Deer-3000</title>
+	<meta name="description" content="Deer-3000 - A site to accompany James Heisig's Remembering the Hanzi and Remembering the Kanji" />
 </svelte:head>
+<div class="relative min-h-screen overflow-x-clip bg-paper text-ink">
+	<!-- page texture + framing -->
+	<div class="bg-grain" aria-hidden="true"></div>
+	<div class="page-mat hidden 2xl:block" aria-hidden="true"></div>
 
-<div class="min-h-screen bg-paper text-ink">
+	<!-- calligraphy in the left page margin on very wide screens -->
+	<div class="deco left-[calc(50vw-830px)] top-44 hidden text-[9.5rem] leading-none min-[1800px]:block" aria-hidden="true">
+		<InkCharacter char="鹿" opacity={0.06} blur={2} />
+	</div>
+
 	<!-- header -->
-	<header class="sticky top-0 z-40 border-b border-line bg-paper/90 backdrop-blur-md">
+	<header class="sticky top-0 z-40 border-b border-line backdrop-blur-md">
 		<div class="mx-auto max-w-[1400px] px-5 md:px-8">
 			<div class="flex items-center justify-between gap-4 py-3.5">
 				<div class="flex min-w-0 items-baseline gap-3">
@@ -182,12 +195,11 @@
 							closeDetail();
 							window.scrollTo({ top: 0, behavior: 'smooth' });
 						}}
-						class="serif-word cursor-pointer truncate text-left text-lg font-medium leading-none tracking-tight md:text-xl"
-						aria-label="Hanzi Index — back to the top"
+						class="text-moss char-hanzi serif-word cursor-pointer truncate text-left text-2xl font-medium leading-none tracking-tight"
+						aria-label="Deer-1 — back to the top"
 					>
-						Remembering <em class="italic text-accent">the Hanzi</em>
+						鹿
 					</button>
-					<span class="eyebrow hidden sm:inline">index · vol. 1–2</span>
 				</div>
 
 				<div class="flex items-center gap-5">
@@ -279,11 +291,16 @@
 
 	<main>
 		<!-- statement -->
-		<section class="mx-auto max-w-[1400px] px-5 pt-12 pb-10 md:px-8 md:pt-16 md:pb-14">
+		<section class="relative px-5 pb-10 pt-12 md:px-8 md:pb-14 md:pt-20 bg-cover bg-center">
+			<!-- swallow flight in the hero's upper margin -->
+	<!-- 		<div class="deco right-1 top-1 hidden aspect-[150/64] w-40 md:block lg:w-56 lg:right-8" aria-hidden="true">
+				<Birds opacity={0.9} className="h-full w-full" />
+			</div>
+ -->
 			<div class="grid gap-10 md:grid-cols-[1.25fr_0.75fr] md:gap-16">
-				<div>
-					<h1 class="serif-word text-[2.6rem] font-light leading-[1.04] tracking-[-0.01em] md:text-[4.2rem]">
-						Every character, <em class="italic">one story</em><br />at a time.
+				<div class="relative">
+					<h1 class="serif-word relative text-[2.6rem] font-light leading-[1.04] tracking-[-0.01em] md:text-[4.2rem]">
+						DEER-<span class="tech-word font-medium text-moss">3000</span>
 					</h1>
 					<p class="mt-7 max-w-xl text-[15px] leading-relaxed text-ink2 md:text-base">
 						All {loading ? 'three thousand' : fmt(countTrad)} frames of <em>Remembering the Hanzi</em> 1 &amp; 2 —
@@ -291,14 +308,14 @@
 						<em>Remembering Simplified Hanzi</em>. Flip between scripts and orders; click a character to hear its
 						reading, coloured by tone.
 					</p>
-				</div>
-				<div class="flex flex-col justify-end gap-5 border-t border-line pt-6 md:border-l md:border-t-0 md:pl-10 md:pt-0">
-					<p class="eyebrow">Readings are coloured by tone</p>
-					<ToneLegend />
 					<p class="eyebrow tnum">
 						{loading ? '…' : `${fmt(countTrad)} traditional · ${fmt(countSimp)} simplified`}{' '}
 						· press <kbd class="rounded border border-line px-1 py-px text-[9px] text-ink2">/</kbd> to search
 					</p>
+				</div>
+									<!-- plum branch climbing the margin beside the statement -->
+				<div class="deco bottom-[-10px] right-[-80px] hidden aspect-[260/300]  xl:block" aria-hidden="true">
+						<BlossomBranch className="h-full w-full" />
 				</div>
 			</div>
 		</section>
@@ -323,25 +340,24 @@
 					</div>
 				{:else}
 					<div
-						class="grid gap-px bg-line"
+						class="grid"
 						style="grid-template-columns: repeat(auto-fill, minmax(5.6rem, 1fr));"
 					>
-						{#each shown as row, i (row.id)}
+						{#each shown as row (row.id)}
 							<HanziCell
 								row={row}
 								script={script}
-								rank={i + 1}
 								active={row.id === selectedId}
 								onclick={(id) => select(id)}
 							/>
 						{/each}
 					</div>
-					<div bind:this={sentinel} class="flex h-16 items-center justify-center gap-3 border-t border-line bg-paper text-[11px] tracking-wide text-faint">
+					<div bind:this={sentinel} class="flex h-16 items-center justify-center gap-3 bg-paper text-[11px] tracking-wide text-faint">
 						{#if loadedCount < list.length}
 							<span class="inline-block size-3 animate-spin rounded-full border border-faint border-t-ink" aria-hidden="true"></span>
 							scroll for more
 						{:else}
-							<span class="tnum">— {fmt(list.length)} characters · {script === 'simp' ? 'simplified' : 'traditional'} · {order === 'orig' ? 'original' : 'optimised'} order —</span>
+							<span class="tnum">— {fmt(list.length)} {list.length === 1 ? 'character' : 'characters'} · {script === 'simp' ? 'simplified' : 'traditional'} · {order === 'orig' ? 'original' : 'optimised'} order —</span>
 						{/if}
 					</div>
 				{/if}
@@ -349,8 +365,13 @@
 		</section>
 
 		<!-- footer -->
-		<footer class="mx-auto max-w-[1400px] px-5 pb-14 pt-12 md:px-8">
-			<div class="grid gap-6 border-t border-line pt-6 text-[12px] leading-relaxed text-ink2 sm:grid-cols-2 md:grid-cols-3">
+		<footer class="relative mx-auto max-w-[1400px] overflow-hidden px-5 pb-16 pt-14 md:px-8">
+			<!-- faint deer watermark in the footer margin -->
+			<div class="deco -right-8 -top-8 hidden text-[16rem] leading-none lg:block" aria-hidden="true">
+				<InkCharacter char="鹿" opacity={0.05} blur={2.2} className="block" />
+			</div>
+
+			<div class="relative grid gap-6 border-t border-line pt-6 text-[12px] leading-relaxed text-ink2 sm:grid-cols-2 md:grid-cols-3">
 				<p>
 					<span class="eyebrow mb-2 block">About</span>
 					Keywords follow James W. Heisig's <em>Remembering the Hanzi 1 &amp; 2</em> (traditional) and
@@ -365,6 +386,24 @@
 					<span class="eyebrow mb-2 block">Data</span>
 					Generated from a merged RTH + RSH deck (<span class="tnum">{fmt(rows.length)}</span> entries) into a small JSON index.
 				</p>
+			</div>
+
+			<!-- deer signature strip -->
+			<div class="relative mt-10 flex flex-wrap items-end justify-between gap-x-10 gap-y-6 border-t border-line pt-7">
+				<p class="max-w-md text-[11px] leading-relaxed text-ink2">
+					<span class="eyebrow mb-2 block text-moss">Deer-1 · nature × technology</span>
+					Heisig's two primers, one quiet index — ink-brushed margins, blossoms, swallows and a deer, set against a
+					digital typeface. <span class="tnum">鹿</span> for the deer.
+				</p>
+				<div class="flex items-center gap-8">
+					<span class="hidden aspect-[150/64] w-36 sm:block" aria-hidden="true">
+						<Birds opacity={0.5} className="h-full w-full" />
+					</span>
+					<span class="hidden aspect-[150/96] w-28 sm:block" aria-hidden="true">
+						<DeerAntler opacity={0.85} className="h-full w-full" />
+					</span>
+					<DeerSeal size={48} />
+				</div>
 			</div>
 		</footer>
 	</main>

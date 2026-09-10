@@ -12,6 +12,10 @@
 	--color-faint: var(--faint);
 	--color-line: var(--line);
 	--color-accent: var(--accent);
+	--color-moss: var(--moss);
+	--color-mossink: var(--moss-ink);
+	--color-cinnabar: var(--cinnabar);
+	--color-cinnabarink: var(--cinnabar-ink);
 	--color-tone-1: var(--tone-1);
 	--color-tone-2: var(--tone-2);
 	--color-tone-3: var(--tone-3);
@@ -19,6 +23,7 @@
 
 	--font-ui: 'Archivo', ui-sans-serif, system-ui, 'PingFang SC', 'Noto Sans CJK SC', sans-serif;
 	--font-display: 'Fraunces', 'Songti SC', Georgia, serif;
+	--font-tech: 'Chakra Petch', 'Archivo', ui-sans-serif, system-ui, sans-serif;
 	--font-hanzi: 'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'STSong', 'SimSun', serif;
 }
 
@@ -30,6 +35,11 @@
 	--faint: #a49d8a;
 	--line: rgb(32 28 20 / 0.16);
 	--accent: #b34a2e;
+
+	--moss: #4a6b33;
+	--moss-ink: #3c5527;
+	--cinnabar: #b0341e;
+	--cinnabar-ink: #8f2a17;
 
 	--tone-1: #c03a2b;
 	--tone-2: #a2650f;
@@ -46,6 +56,11 @@
 	--faint: #6f695a;
 	--line: rgb(236 230 216 / 0.15);
 	--accent: #e2835a;
+
+	--moss: #9cbd82;
+	--moss-ink: #7ea166;
+	--cinnabar: #e2603c;
+	--cinnabar-ink: #c04a2a;
 
 	--tone-1: #e2705f;
 	--tone-2: #dda34f;
@@ -76,21 +91,28 @@
 		outline-offset: 2px;
 	}
 
-	/* Numerals align across tiles/rankings. */
+	/* Numerals + digital data across the site — tech face, tabular. */
 	.tnum {
+		font-family: var(--font-tech);
 		font-variant-numeric: tabular-nums;
+		letter-spacing: 0.01em;
 	}
 }
 
 @layer components {
-	/* small tracked uppercase label */
+	/* small tracked uppercase label — set in the tech face */
 	.eyebrow {
+		font-family: var(--font-tech);
 		text-transform: uppercase;
 		letter-spacing: 0.16em;
 		font-size: 0.625rem;
 		line-height: 1;
 		font-weight: 600;
 		color: var(--faint);
+	}
+
+	.tech-word {
+		font-family: var(--font-tech);
 	}
 
 	.char-hanzi {
@@ -103,6 +125,58 @@
 	.serif-word {
 		font-family: var(--font-display);
 	}
+}
+
+/* ---- nature × tech decorations ---------------------------------------- */
+
+/* quiet paper grain — an SVG-turbulence layer (the site's "shader" wash) */
+.bg-grain {
+	position: fixed;
+	inset: 0;
+	z-index: 40;
+	pointer-events: none;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.055'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23g)'/%3E%3C/svg%3E");
+	mix-blend-mode: multiply;
+}
+.dark .bg-grain {
+	filter: invert(1);
+	mix-blend-mode: screen;
+}
+
+/* faint "mat" frame around the page — gives the margins an edge */
+.page-mat {
+	position: fixed;
+	inset: 0.75rem;
+	pointer-events: none;
+	border: 1px solid var(--line);
+	border-radius: 2px;
+	z-index: 30;
+}
+
+/* decorative art base — never intercepts clicks or layout */
+.deco {
+	position: absolute;
+	pointer-events: none;
+	user-select: none;
+	-webkit-user-select: none;
+}
+
+/* ink-drawn figure: single-tone strokes in the current text colour */
+.ink-figure {
+	color: var(--ink);
+	opacity: 0.9;
+}
+
+/* cinnabar ink-seal stamp */
+.deco-seal {
+	display: inline-grid;
+	place-items: center;
+	color: #fbf4e4;
+	border-radius: 8%;
+	box-shadow:
+		inset 0 0 0 2px currentColor,
+		0 1px 6px rgb(0 0 0 / 0.25);
+	transform: rotate(-4deg);
 }
 
 /* subtle fade/slide used by the detail panel & grid entrance */

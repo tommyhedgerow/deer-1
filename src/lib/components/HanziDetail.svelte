@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { base } from '$app/paths';
+	import DeerSeal from './DeerSeal.svelte';
 	import {
 		bookOf,
 		charOf,
@@ -92,19 +93,23 @@
 </script>
 
 <svelte:head>
-	<title>{row ? `${char} · ${kw || 'Remembering the Hanzi'} — Hanzi Index` : 'Hanzi Index'}</title>
+	<title>{row ? `${char} · ${kw || 'Remembering the Hanzi'} — Deer-1` : 'Deer-1 — Hanzi Index'}</title>
 </svelte:head>
 
 {#if row}
 	<div class="anim-overlay fixed inset-0 z-50 overflow-y-auto bg-paper text-ink" role="dialog" aria-modal="true" aria-label={`Character ${char}`} bind:this={panel}>
-		<div class="mx-auto flex min-h-full w-full max-w-5xl flex-col px-5 pb-10 pt-0 md:px-10">
+		<div class="bg-grain" aria-hidden="true"></div>
+		<div class="relative mx-auto flex min-h-full w-full max-w-5xl flex-col px-5 pb-10 pt-0 md:px-10">
 			<!-- masthead -->
 			<header class="sticky top-0 z-10 -mx-5 flex items-center justify-between border-b border-line bg-paper/95 px-5 py-3 backdrop-blur-sm md:-mx-10 md:px-10">
 				<button type="button" onclick={onclose} class="group inline-flex cursor-pointer items-center gap-2 py-1 text-xs font-semibold tracking-wide text-ink2 transition-colors hover:text-ink">
 					<span class="inline-block transition-transform group-hover:-translate-x-0.5" aria-hidden="true">←</span>
 					Index
 				</button>
-				<span class="eyebrow tnum">{book} · #{frame != null ? pad(frame) : '—'}</span>
+				<span class="flex items-center gap-2.5">
+					<span class="hidden sm:inline-block" aria-hidden="true"><DeerSeal size={17} rotation="-6deg" /></span>
+					<span class="eyebrow tnum">{book} · #{frame != null ? pad(frame) : '—'}</span>
+				</span>
 				<button
 					type="button"
 					onclick={onclose}
