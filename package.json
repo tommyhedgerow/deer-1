@@ -3,7 +3,20 @@
 	"private": true,
 	"version": "0.0.1",
 	"type": "module",
-	"allowScripts": true,
+	"allowScripts": {
+		"dev": true,
+		"build": true,
+		"preview": true,
+		"prepare": true,
+		"check": true,
+		"check:watch": true,
+		"data": true,
+		"db:push": true,
+		"db:generate": true,
+		"db:migrate": true,
+		"db:studio": true,
+		"auth:schema": true
+	},
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
