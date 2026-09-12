@@ -1,0 +1,9 @@
+[build]
+	command = "npm run build"
+	publish = "build"
+
+[build.environment]
+	NODE_VERSION = "24"
+
+# The adapter writes the SSR function to .netlify/functions-internal, which is
+# outside the publish directory and must not be excluded from the deploy.
