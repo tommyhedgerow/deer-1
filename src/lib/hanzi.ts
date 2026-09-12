@@ -3,8 +3,39 @@
 import { base } from '$app/paths';
 import { parseSyllables, stripTones, type Syllable } from './pinyin';
 
+/** The two Chinese scripts. */
 export type Script = 'simp' | 'trad';
+/** The site's language axis: Chinese (two scripts) or Japanese (kanji). */
+export type Lang = 'cn' | 'jp';
+/**
+ * What the index actually renders — a Chinese script, or the Japanese deck.
+ *
+ * Japanese has no simplified/traditional split, so the switcher offers it as a
+ * third curriculum rather than a third script. `'jp'` currently resolves to the
+ * traditional data as a placeholder (see `charOf`/`kwOf`/… below); swapping in a
+ * real kanji deck is a matter of loading its rows and giving it its own branch.
+ */
+export type Curriculum = Script | 'jp';
 export type OrderMode = 'orig' | 'opt';
+
+/** The curriculum a language + script pair resolves to. */
+export const curriculumOf = (lang: Lang, script: Script): Curriculum => (lang === 'jp' ? 'jp' : script);
+
+export const CN_SCRIPTS: Script[] = ['trad', 'simp'];
+export const CURRICULA: Curriculum[] = ['trad', 'simp', 'jp'];
+
+export const isCurriculum = (v: unknown): v is Curriculum =>
+	v === 'trad' || v === 'simp' || v === 'jp';
+
+/** Book code shown beside a frame number. */
+export const bookOf = (c: Curriculum) => (c === 'simp' ? 'RSH' : c === 'trad' ? 'RTH' : 'RTK');
+
+/** Lower-case name used in prose ('3,035 traditional characters'). */
+export const curriculumLabel = (c: Curriculum) =>
+	c === 'simp' ? 'simplified' : c === 'trad' ? 'traditional' : 'japanese';
+
+/** True while the Japanese deck is the traditional deck under another name. */
+export const isPlaceholder = (c: Curriculum) => c === 'jp';
 
 export interface RawRow {
 	id: number; // Orig Order (deck index; == RTH frame for traditional rows)
@@ -17,7 +48,7 @@ export interface RawRow {
 	pos?: string; // part(s) of speech
 	mean?: string; // SH Freq Meaning (senses of the simplified char)
 	py?: string; // SH Freq Pinyin (tone-numbered, /-separated)
-	freq?: string; // SH Freq e.g. "0.16%"
+	freq?: string; // SH Freq e.g. "0.16%" (kept in the index; the UI shows rank bands instead)
 	rank?: number; // SH Freq Rank
 	grp?: number; // SH Freq Group
 	nr?: number; // RTH frame number (absent → not in the RTH curriculum)
@@ -28,41 +59,43 @@ export interface RawRow {
 	lrm?: string; // RTH Merge Lesson
 	ls?: string; // RSH Lesson
 	lsm?: string; // RSH Lesson Merged
+	comp?: string; // components the character is built from (not in the deck yet)
 }
 
-export const bookOf = (s: Script) => (s === 'simp' ? 'RSH' : 'RTH');
-export const charOf = (r: RawRow, s: Script) => (s === 'simp' ? r.sh : r.th);
-export const otherCharOf = (r: RawRow, s: Script) => (s === 'simp' ? r.th : r.sh);
-export const kwOf = (r: RawRow, s: Script) => (s === 'simp' ? r.ks ?? '' : r.kr ?? '');
-export const frameOf = (r: RawRow, s: Script) => (s === 'simp' ? r.ns : r.nr);
-export const optOf = (r: RawRow, s: Script) => (s === 'simp' ? r.os : r.or);
-export const lessonOf = (r: RawRow, s: Script) => (s === 'simp' ? r.ls ?? '' : r.lr ?? '');
-export const lessonMergedOf = (r: RawRow, s: Script) => (s === 'simp' ? r.lsm ?? '' : r.lrm ?? '');
+// Every accessor below treats `'jp'` as the traditional deck for now: Japanese
+// is on the site as a placeholder, and its real data (kanji keywords, on/kun
+// readings, RTK frame numbers) will arrive through its own branch here.
+export const charOf = (r: RawRow, c: Curriculum) => (c === 'simp' ? r.sh : r.th);
+export const otherCharOf = (r: RawRow, c: Curriculum) => (c === 'simp' ? r.th : r.sh);
+export const kwOf = (r: RawRow, c: Curriculum) => (c === 'simp' ? r.ks ?? '' : r.kr ?? '');
+export const frameOf = (r: RawRow, c: Curriculum) => (c === 'simp' ? r.ns : r.nr);
+export const optOf = (r: RawRow, c: Curriculum) => (c === 'simp' ? r.os : r.or);
+export const lessonOf = (r: RawRow, c: Curriculum) => (c === 'simp' ? r.ls ?? '' : r.lr ?? '');
+export const lessonMergedOf = (r: RawRow, c: Curriculum) =>
+	c === 'simp' ? r.lsm ?? '' : r.lrm ?? '';
 export const sameForm = (r: RawRow) => r.th === r.sh;
 /** Does this row also belong to the other book's curriculum? */
-export const inOtherBook = (r: RawRow, s: Script) => (s === 'simp' ? r.nr != null : r.ns != null);
+export const inOtherBook = (r: RawRow, c: Curriculum) => (c === 'simp' ? r.nr != null : r.ns != null);
 
 /** A row belongs to a curriculum when its frame number is present. */
-export function inBook(r: RawRow, s: Script): boolean {
-	return frameOf(r, s) != null;
+export function inBook(r: RawRow, c: Curriculum): boolean {
+	return frameOf(r, c) != null;
 }
 
 /** Sort key inside a curriculum view. */
-export function orderKey(r: RawRow, s: Script, mode: OrderMode): number {
+export function orderKey(r: RawRow, c: Curriculum, mode: OrderMode): number {
 	if (mode === 'opt') {
-		const o = optOf(r, s);
+		const o = optOf(r, c);
 		if (typeof o === 'number') return o;
 	}
-	const f = frameOf(r, s);
+	const f = frameOf(r, c);
 	return typeof f === 'number' ? f : Number.MAX_SAFE_INTEGER;
 }
 
 /** Build the ordered view for a curriculum + ordering. */
-export function viewRows(rows: RawRow[], s: Script, mode: OrderMode): RawRow[] {
-	return rows.filter(inBookCurried(s)).sort((a, b) => orderKey(a, s, mode) - orderKey(b, s, mode));
+export function viewRows(rows: RawRow[], c: Curriculum, mode: OrderMode): RawRow[] {
+	return rows.filter((r) => inBook(r, c)).sort((a, b) => orderKey(a, c, mode) - orderKey(b, c, mode));
 }
-
-const inBookCurried = (s: Script) => (r: RawRow) => inBook(r, s);
 
 interface Searchable {
 	kw: string;
@@ -165,20 +198,35 @@ function tokensOf(str: string): string[] {
  * `also`  — remaining readings, scoped so the simplified character never
  *           inherits readings that only belong to its traditional twin.
  */
-export function readingsFor(r: RawRow, s: Script): ReadingSet {
+export function readingsFor(r: RawRow, c: Curriculum): ReadingSet {
 	const same = sameForm(r);
 	const taught = parseSyllables(tokensOf(r.rr ?? ''));
 	const have = new Set(taught.map((x) => `${x.letters}|${x.tone}`));
 
 	const pool: string[] = [];
-	if (s === 'trad') {
-		pool.push(...tokensOf(r.rt ?? ''), ...tokensOf(r.py ?? ''));
-	} else {
+	if (c === 'simp') {
 		pool.push(...tokensOf(r.py ?? ''));
 		if (same) pool.push(...tokensOf(r.rt ?? ''));
+	} else {
+		// traditional — and, for now, the japanese placeholder
+		pool.push(...tokensOf(r.rt ?? ''), ...tokensOf(r.py ?? ''));
 	}
 	const also = parseSyllables(pool).filter((x) => !have.has(`${x.letters}|${x.tone}`));
 	return { taught, also };
+}
+
+/**
+ * The parts a character is built from, as recorded in the deck.
+ *
+ * No decomposition data ships yet, so every row returns an empty list and the
+ * detail panel shows its "not recorded" state. `scripts/build-data.mjs` picks the
+ * list up from a `Components` column as soon as the deck carries one.
+ */
+export function componentsOf(r: RawRow): string[] {
+	return (r.comp ?? '')
+		.split(/[\s·+]+/)
+		.map((x) => x.trim())
+		.filter(Boolean);
 }
 
 let _rows: RawRow[] | null = null;

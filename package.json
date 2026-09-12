@@ -3,20 +3,6 @@
 	"private": true,
 	"version": "0.0.1",
 	"type": "module",
-	"allowScripts": {
-		"dev": true,
-		"build": true,
-		"preview": true,
-		"prepare": true,
-		"check": true,
-		"check:watch": true,
-		"data": true,
-		"db:push": true,
-		"db:generate": true,
-		"db:migrate": true,
-		"db:studio": true,
-		"auth:schema": true
-	},
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
@@ -32,16 +18,13 @@
 		"auth:schema": "auth generate --config src/lib/server/auth.ts --output src/lib/server/db/auth.schema.ts --yes"
 	},
 	"devDependencies": {
-		"@libsql/client": "^0.17.3",
 		"@sveltejs/adapter-auto": "^7.0.1",
 		"@sveltejs/kit": "^2.63.0",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
 		"@tailwindcss/vite": "^4.3.0",
 		"@types/node": "^24",
 		"auth": "^1.6.23",
-		"better-auth": "^1.6.23",
 		"drizzle-kit": "^0.31.10",
-		"drizzle-orm": "^0.45.2",
 		"svelte": "^5.56.1",
 		"svelte-check": "^4.6.0",
 		"tailwindcss": "^4.3.0",
@@ -49,7 +32,10 @@
 		"vite": "^8.0.16"
 	},
 	"dependencies": {
+		"@libsql/client": "^0.17.3",
 		"@sveltejs/adapter-netlify": "^6.0.4",
+		"better-auth": "^1.6.23",
+		"drizzle-orm": "^0.45.2",
 		"gh": "^2.8.9"
 	}
 }

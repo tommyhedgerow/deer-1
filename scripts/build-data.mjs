@@ -1,5 +1,9 @@
 // Builds static/data/hanzi.json from the RTH+RSH CSV.
 // Usage: node scripts/build-data.mjs [path-to-csv]
+//
+// Every curriculum the site offers is read from this one index: `trad` (RTH),
+// `simp` (RSH) and — until a kanji deck of its own exists — `jp`, which the UI
+// renders from the traditional fields as a placeholder.
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -66,6 +70,11 @@ for (const r of rows.slice(1)) {
 	set('lrm', str(r[I['RTH Merge Lesson']]));
 	set('ls', str(r[I['RSH Lesson']]));
 	set('lsm', str(r[I['RSH Lesson Merged']]));
+	// Components — the parts a character is built from. No decomposition data
+	// ships in the deck today, so this stays empty and the detail panel shows
+	// its "not recorded yet" state. Add a `Components` column (space- or
+	// ·-separated) to the CSV and the field fills in with no further changes.
+	set('comp', str(r[I['Components']]));
 	data.push(row);
 }
 
